@@ -20,7 +20,8 @@ class Player(private val context: Context) {
   }
 
   fun restart() {
-    _exoPlayer = ExoPlayer.Builder(context).build()
+    _exoPlayer = ExoPlayer.Builder(context)
+      .build()
     onRestartListener?.onRestart()
   }
 

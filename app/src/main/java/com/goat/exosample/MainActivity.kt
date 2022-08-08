@@ -8,6 +8,7 @@ import androidx.media3.common.util.Util
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.goat.exosample.ExoAdapter.Companion
 import com.goat.exosample.databinding.ActivityMainBinding
+import com.goat.exosample.epoxy.EpoxyExoController
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
@@ -17,8 +18,8 @@ class MainActivity : AppCompatActivity() {
   private val exoPool: ExoPool by lazy {
     ExoPool(this)
   }
-  private val adapter: ExoAdapter by lazy {
-    ExoAdapter(exoPool, viewModel::updatePlaybackPosition)
+  private val controller: EpoxyExoController by lazy {
+    EpoxyExoController(exoPool, viewModel::updatePlaybackPosition)
   }
   private lateinit var binding: ActivityMainBinding
 
@@ -27,14 +28,11 @@ class MainActivity : AppCompatActivity() {
     binding = ActivityMainBinding.inflate(layoutInflater).also { view -> setContentView(view.root) }
     binding.videos.apply {
       layoutManager = LinearLayoutManager(this@MainActivity)
-      adapter = this@MainActivity.adapter
+      adapter = controller.adapter
       addItemDecoration(SpaceItemDecoration())
     }
     viewModel.media
-      .onEach { media -> adapter.updateMedia(media) }
-      .launchIn(lifecycleScope)
-    viewModel.playbackPositions
-      .onEach { playbackPositions -> adapter.playbackPositions = playbackPositions }
+      .onEach { media -> controller.setData(media) }
       .launchIn(lifecycleScope)
   }
 

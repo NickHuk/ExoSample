@@ -4,9 +4,7 @@ import android.content.Context
 import androidx.media3.exoplayer.ExoPlayer
 import java.lang.ref.WeakReference
 
-class ExoPool(
-  private val context: Context
-) {
+class ExoPool(private val context: Context) {
   private val exoPlayers: MutableList<Player> = mutableListOf()
 
   @Synchronized
