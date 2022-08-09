@@ -13,17 +13,14 @@ import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
 class MainActivity : AppCompatActivity() {
-  private val viewModel: MainViewModel by viewModels()
-  private val exoPool: ExoPool by lazy {
-    ExoPool(this)
-  }
-  private val playbackManager by lazy {
-    PlaybackManager()
-  }
+  private val viewModel: MainViewModel by viewModels(
+    factoryProducer = { MainViewModelFactory(applicationContext) }
+  )
+
   private val controller: EpoxyExoController by lazy {
     EpoxyExoController(
-      exoPool,
-      playbackManager,
+      viewModel.exoPool,
+      viewModel.playbackManager,
       viewModel::updatePlaybackPosition,
     )
   }
@@ -31,6 +28,7 @@ class MainActivity : AppCompatActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    Timber.tag(VIDEO_LIST).d("activity onCreate")
     binding = ActivityMainBinding.inflate(layoutInflater).also { view -> setContentView(view.root) }
     binding.videos.apply {
       layoutManager = LinearLayoutManager(this@MainActivity)
@@ -42,29 +40,11 @@ class MainActivity : AppCompatActivity() {
       .launchIn(lifecycleScope)
   }
 
-  override fun onPause() {
-    super.onPause()
-    if (Util.SDK_INT <= 23) {
-      Timber.tag(VIDEO_LIST).d("release pool")
-      playbackManager.release()
-      exoPool.releaseAll()
-    }
-  }
-
-  override fun onStop() {
-    super.onStop()
-    if (Util.SDK_INT > 23) {
-      Timber.tag(VIDEO_LIST).d("release pool")
-      playbackManager.release()
-      exoPool.releaseAll()
-    }
-  }
-
   override fun onStart() {
     super.onStart()
     if (Util.SDK_INT > 23) {
       Timber.tag(VIDEO_LIST).d("restart pool")
-      playbackManager.restart()
+      viewModel.playbackManager.restart()
     }
   }
 
@@ -72,8 +52,26 @@ class MainActivity : AppCompatActivity() {
     super.onResume()
     if (Util.SDK_INT <= 23) {
       Timber.tag(VIDEO_LIST).d("restart pool")
-      playbackManager.restart()
+      viewModel.playbackManager.restart()
     }
+  }
+
+  override fun onPause() {
+    if (Util.SDK_INT <= 23) {
+      Timber.tag(VIDEO_LIST).d("release pool pause")
+      viewModel.playbackManager.release()
+      viewModel.exoPool.releaseAll()
+    }
+    super.onPause()
+  }
+
+  override fun onStop() {
+    if (Util.SDK_INT > 23) {
+      Timber.tag(VIDEO_LIST).d("release pool stop")
+      viewModel.playbackManager.release()
+      viewModel.exoPool.releaseAll()
+    }
+    super.onStop()
   }
 
   override fun onDestroy() {

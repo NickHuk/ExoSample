@@ -5,11 +5,15 @@ class PlaybackManager {
   val restartListeners: MutableList<OnRestartListener> = mutableListOf()
 
   fun release() {
-    restartListeners.forEach { it.onRelease() }
+    for(listener in restartListeners) {
+      listener.onRelease()
+    }
   }
 
   fun restart() {
-    restartListeners.forEach { it.onRestart() }
+    for(listener in restartListeners) {
+      listener.onRestart()
+    }
   }
 
   fun addOnRestartListener(listener: OnRestartListener) {

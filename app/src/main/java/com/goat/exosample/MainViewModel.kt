@@ -1,5 +1,6 @@
 package com.goat.exosample
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.goat.exosample.epoxy.MediaData
@@ -8,7 +9,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
-class MainViewModel : ViewModel() {
+class MainViewModel(private val context: Context) : ViewModel() {
+  val exoPool: ExoPool by lazy {
+    ExoPool(context)
+  }
+  val playbackManager by lazy { PlaybackManager() }
   private val _media: MutableSharedFlow<List<MediaData>> = MutableSharedFlow(replay = 1)
   val media: Flow<List<MediaData>> = _media
 

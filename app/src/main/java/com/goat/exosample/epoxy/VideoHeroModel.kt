@@ -36,7 +36,6 @@ abstract class VideoHeroModel(
 
   override fun bind(holder: VideoHeroHolder) {
     holder.bind(media, updatePlaybackPosition)
-    Timber.tag(VIDEO_LIST).d("bind media: %s", media.url)
   }
 
   inner class VideoHeroHolder(
@@ -45,6 +44,7 @@ abstract class VideoHeroModel(
   ) : EpoxyHolder() {
     private lateinit var player: WeakReference<Player>
     lateinit var binding: VideoHeroViewBinding
+    var restartListenerSet: Boolean = false
 
     private lateinit var onRestartListener: OnRestartListener
 
@@ -54,26 +54,39 @@ abstract class VideoHeroModel(
 
     fun bind(mediaData: MediaData, updatePlaybackPosition: ((Long) -> Unit)?) {
       player = exoPool.acquire()
-      playbackManager.addOnRestartListener(
-        HolderRestartListener(mediaData, updatePlaybackPosition).also {
-          onRestartListener = it
-        }
-      )
+      if(!restartListenerSet) {
+        playbackManager.addOnRestartListener(
+          HolderRestartListener(mediaData, updatePlaybackPosition).also {
+            onRestartListener = it
+          }
+        )
+        restartListenerSet = true
+      }
       player.get()?.let { p ->
-        Timber.tag(VIDEO_LIST).d("PLAY holder: %s video: %s player acquired: %s", hashCode(), mediaData.url.split('/').last(), player.get()?.hashCode())
+        Timber.tag(VIDEO_LIST).d(
+          "PLAY video: %s, playback position %d, player acquired: %s",
+          mediaData.url.split('/').last(),
+          mediaData.playbackPosition,
+          player.get()?.hashCode()
+        )
         play(p, mediaData.url, mediaData.playbackPosition)
       }
     }
 
     fun restore(mediaData: MediaData, updatePlaybackPosition: ((Long) -> Unit)?) {
       if(player.get() === null) {
-        Timber.tag(VIDEO_LIST).d("player restored url = %s playback position = %d", media.url.split('/').last(), media.playbackPosition)
+        Timber.tag(VIDEO_LIST).d(
+          "player restored url = %s, playback position = %d",
+          mediaData.url.split('/').last(),
+          mediaData.playbackPosition
+        )
         bind(mediaData, updatePlaybackPosition)
       }
     }
 
     fun stopPlayer(updatePlaybackPosition: ((Long) -> Unit)?) {
       playbackManager.detachListener(onRestartListener)
+      restartListenerSet = false
       player.get()?.let { p ->
         updatePlaybackPosition?.invoke(p.exoPlayer.currentPosition)
         exoPool.stop(p)
@@ -95,16 +108,28 @@ abstract class VideoHeroModel(
       private val media: MediaData,
       private var updatePlaybackPosition: ((Long) -> Unit)?
     ) : OnRestartListener {
-      private lateinit var player: WeakReference<Player>
 
       override fun onRelease() {
+        Timber.tag(VIDEO_LIST).d(
+          "in onRelease, player: %s",
+          player.get()?.exoPlayer?.toString()
+        )
         player.get()?.exoPlayer?.let { exoPlayer ->
-          Timber.tag(VIDEO_LIST).d("player released: video = %s", media.url.split('/').last())
+          Timber.tag(VIDEO_LIST).d(
+            "player released: video = %s, playback position = %d",
+            media.url.split('/').last(),
+            media.playbackPosition,
+          )
           updatePlaybackPosition?.invoke(exoPlayer.currentPosition)
         }
       }
 
       override fun onRestart() {
+        Timber.tag(VIDEO_LIST).d(
+          "player restarted: video = %s, playback position = %d",
+          media.url.split('/').last(),
+          media.playbackPosition,
+        )
         bind(media, updatePlaybackPosition)
       }
     }
