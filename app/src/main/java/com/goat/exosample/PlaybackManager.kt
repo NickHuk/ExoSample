@@ -23,10 +23,6 @@ class PlaybackManager {
   fun detachListener(listener: OnRestartListener)  {
     restartListeners.remove(listener)
   }
-
-  fun clear() {
-    restartListeners.clear()
-  }
 }
 
 interface OnRestartListener {

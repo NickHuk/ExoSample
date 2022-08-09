@@ -9,6 +9,6 @@ class SpaceItemDecoration : RecyclerView.ItemDecoration() {
 
   override fun getItemOffsets(outRect: Rect, view: View, parent: RecyclerView, state: State) {
     super.getItemOffsets(outRect, view, parent, state)
-    outRect.bottom = outRect.bottom + 2048
+    outRect.bottom = outRect.bottom + 1024
   }
 }
