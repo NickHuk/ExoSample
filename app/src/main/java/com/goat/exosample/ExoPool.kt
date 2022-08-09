@@ -1,23 +1,40 @@
 package com.goat.exosample
 
 import android.content.Context
-import androidx.media3.exoplayer.ExoPlayer
+import timber.log.Timber
 import java.lang.ref.WeakReference
 
 class ExoPool(private val context: Context) {
-  private val exoPlayers: MutableList<Player> = mutableListOf()
+  private val lockedExoPlayers: MutableList<Player> = mutableListOf()
+  private val freeExoPlayers: MutableList<Player> = mutableListOf(Player(context))
 
   @Synchronized
-  fun acquire(): Player =
-    Player(context)
-      .also { player -> exoPlayers.add(player) }
+  fun acquire(): WeakReference<Player> =
+    if(freeExoPlayers.isEmpty()) {
+      WeakReference(Player(context).also(lockedExoPlayers::add))
+    } else {
+      WeakReference(freeExoPlayers.removeLast().also(lockedExoPlayers::add))
+    }.also {
+      Timber.tag(VIDEO_LIST).d(
+        "pool size: %d / %d",
+        lockedExoPlayers.size,
+        lockedExoPlayers.size + freeExoPlayers.size
+      )
+    }
 
-  fun restart() {
-    exoPlayers.forEach { it.restart() }
+  @Synchronized
+  fun stop(player: Player) {
+    player.stopExoPlayer()
+    lockedExoPlayers.remove(player)
+    if(player.used < 2)
+      freeExoPlayers += player
   }
 
   @Synchronized
-  fun release() {
-    exoPlayers.forEach { it.releaseExoPlayer() }
+  fun releaseAll() {
+    lockedExoPlayers.forEach { player ->
+      player.releaseExoPlayer()
+    }
+    lockedExoPlayers.clear()
   }
 }

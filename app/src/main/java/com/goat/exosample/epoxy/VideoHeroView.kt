@@ -1,3 +1,4 @@
+/*
 package com.goat.exosample.epoxy
 
 import android.content.Context
@@ -10,8 +11,8 @@ import com.airbnb.epoxy.CallbackProp
 import com.airbnb.epoxy.ModelProp
 import com.airbnb.epoxy.ModelView
 import com.airbnb.epoxy.ModelView.Size.MATCH_WIDTH_WRAP_HEIGHT
-import com.goat.exosample.ExoAdapter
 import com.goat.exosample.Player
+import com.goat.exosample.VIDEO_LIST
 import com.goat.exosample.databinding.VideoHeroViewBinding
 import timber.log.Timber
 
@@ -49,7 +50,7 @@ class VideoHeroView @JvmOverloads constructor(
       player.setOnReleaseListener {
         updatePlaybackPositionListener?.invoke(player.exoPlayer.get()?.currentPosition ?: 0)
       }
-      Timber.tag(ExoAdapter.VIDEO_LIST).d(
+      Timber.tag(VIDEO_LIST).d(
         "restart player: position ?, playbackPosition %d",
         media.playbackPosition
       )
@@ -68,13 +69,5 @@ class VideoHeroView @JvmOverloads constructor(
     }
   }
 
-  fun restore() {
-    if(player.exoPlayer.get() == null) {
-      player.restart()
-    }
-  }
 
-  fun release() {
-    player.releaseExoPlayer()
-  }
-}
+}*/

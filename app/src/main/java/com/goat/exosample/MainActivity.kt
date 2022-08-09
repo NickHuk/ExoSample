@@ -6,7 +6,6 @@ import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.Util
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.goat.exosample.ExoAdapter.Companion
 import com.goat.exosample.databinding.ActivityMainBinding
 import com.goat.exosample.epoxy.EpoxyExoController
 import kotlinx.coroutines.flow.launchIn
@@ -18,8 +17,15 @@ class MainActivity : AppCompatActivity() {
   private val exoPool: ExoPool by lazy {
     ExoPool(this)
   }
+  private val playbackManager by lazy {
+    PlaybackManager()
+  }
   private val controller: EpoxyExoController by lazy {
-    EpoxyExoController(exoPool, viewModel::updatePlaybackPosition)
+    EpoxyExoController(
+      exoPool,
+      playbackManager,
+      viewModel::updatePlaybackPosition,
+    )
   }
   private lateinit var binding: ActivityMainBinding
 
@@ -39,32 +45,34 @@ class MainActivity : AppCompatActivity() {
   override fun onPause() {
     super.onPause()
     if (Util.SDK_INT <= 23) {
-      Timber.tag(ExoAdapter.VIDEO_LIST).d("release pool")
-      exoPool.release()
+      Timber.tag(VIDEO_LIST).d("release pool")
+      playbackManager.release()
+      exoPool.releaseAll()
     }
   }
 
   override fun onStop() {
     super.onStop()
     if (Util.SDK_INT > 23) {
-      Timber.tag(ExoAdapter.VIDEO_LIST).d("release pool")
-      exoPool.release()
+      Timber.tag(VIDEO_LIST).d("release pool")
+      playbackManager.release()
+      exoPool.releaseAll()
     }
   }
 
   override fun onStart() {
     super.onStart()
     if (Util.SDK_INT > 23) {
-      Timber.tag(Companion.VIDEO_LIST).d("restart pool")
-      exoPool.restart()
+      Timber.tag(VIDEO_LIST).d("restart pool")
+      playbackManager.restart()
     }
   }
 
   override fun onResume() {
     super.onResume()
     if (Util.SDK_INT <= 23) {
-      Timber.tag(Companion.VIDEO_LIST).d("restart pool")
-      exoPool.restart()
+      Timber.tag(VIDEO_LIST).d("restart pool")
+      playbackManager.restart()
     }
   }
 }

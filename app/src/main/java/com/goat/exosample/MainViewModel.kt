@@ -19,15 +19,16 @@ class MainViewModel : ViewModel() {
           MediaData("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"),
           MediaData("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4"),
           MediaData("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4"),
-          MediaData("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4")
+          MediaData("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"),
+          MediaData("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WhatCarCanYouGetForAGrand.mp4"),
+          MediaData("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"),
+          MediaData("https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.mp4")
         )
       )
     }
   }
 
   fun updatePlaybackPosition(holderPosition: Int, playbackPosition: Long) {
-    viewModelScope.launch(Dispatchers.IO) {
-      _media.replayCache.first()[holderPosition].playbackPosition = playbackPosition
-    }
+    _media.replayCache.first()[holderPosition].playbackPosition = playbackPosition
   }
 }
