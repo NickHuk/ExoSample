@@ -30,7 +30,9 @@ class EpoxyExoController(
     super.onViewAttachedToWindow(epoxyViewHolder, model)
     when(val holder = epoxyViewHolder.holder) {
       is VideoHeroModel.VideoHeroHolder -> {
-        holder.restore()
+        holder.restore((model as VideoHeroModel).media) { playbackPosition ->
+          onUpdatePlaybackPosition(epoxyViewHolder.absoluteAdapterPosition, playbackPosition)
+        }
       }
     }
   }
@@ -39,7 +41,9 @@ class EpoxyExoController(
     super.onViewDetachedFromWindow(epoxyViewHolder, model)
     when(val holder = epoxyViewHolder.holder) {
       is VideoHeroModel.VideoHeroHolder -> {
-        holder.stopPlayer()
+        holder.stopPlayer { playbackPosition ->
+          onUpdatePlaybackPosition(epoxyViewHolder.absoluteAdapterPosition, playbackPosition)
+        }
       }
     }
   }

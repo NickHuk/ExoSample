@@ -75,4 +75,9 @@ class MainActivity : AppCompatActivity() {
       playbackManager.restart()
     }
   }
+
+  override fun onDestroy() {
+    Timber.tag(VIDEO_LIST).d("activity destroyed")
+    super.onDestroy()
+  }
 }
